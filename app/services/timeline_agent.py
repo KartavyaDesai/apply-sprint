@@ -13,7 +13,14 @@ and source_reference (URL or short source label, or null).
 Use date_type=official only for an explicit date stated by the university. Use recommended for a suggested
 preparation date derived from a known application deadline; clearly say it is a suggested date in description.
 If no reliable date can be established, use null and date_type=unknown. Never manufacture a deadline.
-Order tasks by due date when known, otherwise by sensible workflow. Do not claim to have inspected missing sources."""
+Order tasks by due date when known, otherwise by sensible workflow. Do not claim to have inspected missing sources.
+Return your response as a JSON object with exactly one
+top-level key named "items".
+
+The "items" key must contain an array of 4–5 timeline objects.
+
+NEVER return a JSON array directly as the top-level response.
+"""
 
 def generate_timeline(application: dict, source_text: str) -> TimelineGeneration:
     if not settings.groq_api_key:
@@ -47,8 +54,18 @@ def generate_timeline(application: dict, source_text: str) -> TimelineGeneration
         temperature=0.15,
         response_format={"type": "json_object"},
     )
+    print(completion)
     raw = completion.choices[0].message.content or "{}"
     try:
-        return TimelineGeneration.model_validate_json(raw)
+        parsed = json.loads(raw)
+
+        # Handle both list and object responses
+        if isinstance(parsed, list):
+            parsed = {"items": parsed}
+
+        return TimelineGeneration.model_validate(parsed)
+
     except Exception as exc:
-        raise ValueError(f"Groq returned invalid timeline JSON: {exc}") from exc
+        raise ValueError(
+            f"Groq returned invalid timeline JSON: {exc}"
+        ) from exc
