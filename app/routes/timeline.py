@@ -31,16 +31,72 @@ def patch_timeline_item(timeline_item_id: str, patch: TimelinePatch):
     return result.data[0]
 
 @router.put("/timeline/{timeline_item_id}/notes")
-def update_notes(timeline_item_id: str, payload: NotesUpdate):
+def update_notes(
+    timeline_item_id: str,
+    payload: NotesUpdate
+):
     client = get_supabase()
-    item = client.table("timeline_items").select("id").eq("id", timeline_item_id).maybe_single().execute().data
+
+    # 1. Verify that the timeline item exists
+    item_response = (
+        client.table("timeline_items")
+        .select("id")
+        .eq("id", timeline_item_id)
+        .maybe_single()
+        .execute()
+    )
+
+    item = item_response.data if item_response else None
+
     if not item:
-        raise HTTPException(404, "Timeline item not found")
-    existing = client.table("timeline_notes").select("*").eq("timeline_item_id", timeline_item_id).maybe_single().execute().data
-    values = {"note": payload.note, "updated_at": now_iso()}
+        raise HTTPException(
+            status_code=404,
+            detail="Timeline item not found"
+        )
+
+    # 2. Check whether a notes record already exists
+    notes_response = (
+        client.table("timeline_notes")
+        .select("*")
+        .eq("timeline_item_id", timeline_item_id)
+        .maybe_single()
+        .execute()
+    )
+
+    existing = notes_response.data if notes_response else None
+
+    # 3. Prepare note data
+    values = {
+        "note": payload.note,
+        "updated_at": now_iso()
+    }
+
+    # 4. Update existing notes or create a new record
     if existing:
-        result = client.table("timeline_notes").update(values).eq("id", existing["id"]).execute()
+        result = (
+            client.table("timeline_notes")
+            .update(values)
+            .eq("id", existing["id"])
+            .execute()
+        )
     else:
-        values.update({"timeline_item_id": timeline_item_id, "attachments": [], "created_at": now_iso()})
-        result = client.table("timeline_notes").insert(values).execute()
+        values.update({
+            "timeline_item_id": timeline_item_id,
+            "attachments": [],
+            "created_at": now_iso()
+        })
+
+        result = (
+            client.table("timeline_notes")
+            .insert(values)
+            .execute()
+        )
+
+    # 5. Return saved record
+    if not result or not result.data:
+        raise HTTPException(
+            status_code=500,
+            detail="Could not save timeline notes"
+        )
+
     return result.data[0]
