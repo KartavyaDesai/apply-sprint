@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New application — ApplySprint</title><link rel="stylesheet" href="/static/css/style.css"></head>
+<body><div class="shell"><header class="topbar"><a class="brand" href="/">Apply<span>Sprint</span><i>.</i></a><a class="back-link" href="/">← Dashboard</a></header>
+<main class="form-page"><p class="eyebrow">START WITH THE BASICS</p><h1>Create an <em>application.</em></h1><p class="muted">Add what you know. You can fill in missing details later.</p>
+<form id="create-form" class="panel form-grid">
+<label>University name <b>*</b><input name="university_name" required placeholder="e.g. Leibniz University Hannover"></label>
+<label>Program / course name <b>*</b><input name="program_name" required placeholder="e.g. M.Sc. Computer Science"></label>
+<label class="full">Program URL <b>*</b><input name="program_url" type="url" required placeholder="https://university.edu/program"></label>
+<label class="full">Admission requirements URL <small>Optional</small><input name="admission_url" type="url" placeholder="https://university.edu/admissions"></label>
+<label>Application deadline <small>Optional</small><input name="application_deadline" type="date"></label>
+<label>Intake / semester <small>Optional</small><input name="intake" placeholder="Winter Semester 2027"></label>
+<label class="full">Admission guideline PDF <small>Optional · max 15 MB</small><input name="admission_pdf" type="file" accept="application/pdf"></label>
+<label class="full">Additional context <small>Optional</small><textarea name="additional_context" rows="4" placeholder="Anything the AI should know: applicant background, special instructions, or questions to verify…"></textarea></label>
+<div class="full form-actions"><a class="back-link" href="/">Cancel</a><button class="button primary" type="submit" id="submit-btn">Create & generate timeline →</button></div>
+<p class="full form-hint">The ticket is saved even if AI generation fails. You can retry it from the application page.</p>
+<div class="full" id="form-error" role="alert"></div></form></main><footer>ApplySprint <span>Less overwhelm. More momentum.</span></footer></div><script src="/static/js/app.js"></script></body></html>
